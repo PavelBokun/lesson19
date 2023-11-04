@@ -9,7 +9,7 @@ import {
   UpdateTaskArgType,
   UpdateTaskModelType,
 } from "features/TodolistsList/todolists.api";
-import { createAppAsyncThunk, handleServerAppError, handleServerNetworkError } from "common/utils";
+import { createAppAsyncThunk, handleServerAppError, handleServerNetworkError, thunkTryCatch } from "common/utils";
 import { ResultCode, TaskPriorities, TaskStatuses } from "common/enums";
 import { clearTasksAndTodolists } from "common/actions";
 
@@ -30,7 +30,22 @@ const fetchTasks = createAppAsyncThunk<{ tasks: TaskType[]; todolistId: string }
   },
 );
 
+
 const addTask = createAppAsyncThunk<{ task: TaskType }, AddTaskArgType>("tasks/addTask", async (arg, thunkAPI) => {
+  const { dispatch, rejectWithValue } = thunkAPI;
+   return thunkTryCatch(thunkAPI, async ()=>{
+    const res = await todolistsApi.createTask(arg);
+    if (res.data.resultCode === ResultCode.Success) {
+      const task = res.data.data.item;
+      return { task };
+    } else {
+      handleServerAppError(res.data, dispatch);
+      return rejectWithValue(null);
+    }
+   })
+});
+
+const _addTask = createAppAsyncThunk<{ task: TaskType }, AddTaskArgType>("tasks/addTask", async (arg, thunkAPI) => {
   const { dispatch, rejectWithValue } = thunkAPI;
   try {
     dispatch(appActions.setAppStatus({ status: "loading" }));
