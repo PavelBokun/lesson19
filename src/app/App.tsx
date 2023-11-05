@@ -20,6 +20,8 @@ import { useAppDispatch } from "common/hooks";
 import { selectIsLoggedIn } from "features/auth/auth.selectors";
 import { selectAppStatus, selectIsInitialized } from "app/app.selectors";
 import { authThunk, logout } from "features/auth/auth.reducer";
+import { bindActionCreators } from "redux";
+import { useActions } from "common/hooks/useActions";
 
 function App() {
   const status = useSelector(selectAppStatus);
@@ -28,12 +30,18 @@ function App() {
 
   const dispatch = useAppDispatch();
 
+const {initializeApp, logout}=useActions(authThunk)
+
   useEffect(() => {
-    dispatch(authThunk.initializeApp());
+    // dispatch(authThunk.initializeApp());
+    //  const sb=bindActionCreators(authThunk.initializeApp,dispatch)
+    //  sb()
+    initializeApp()
   }, []);
 
   const logoutHandler = useCallback(() => {
-    dispatch(authThunk.logout());
+    // dispatch(authThunk.logout());
+    logout ()
   }, []);
 
   if (!isInitialized) {
